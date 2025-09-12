@@ -22,6 +22,15 @@
           "awslogs-region": "eu-central-1",
           "awslogs-stream-prefix": "ecs-stack-container-log"
         }
+      },
+      "HealthCheck": {
+        "Command": [
+          "CMD-SHELL",
+          "curl -f http://localhost:80/ || exit 1"
+        ],
+        "Interval": 30,
+        "Timeout": 5,
+        "Retries": 3
       }
     }
   ]
