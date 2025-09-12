@@ -1,0 +1,28 @@
+{
+  "family": "ecs-stack-task-definition",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::711387109786:role/ecs-stack-ECSTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "ecs-stack-container",
+      "image": "<IMAGE1_NAME>",
+      "portMappings": [
+        {
+          "containerPort": 80,
+        "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/ecs-stack-log-group",
+          "awslogs-region": "eu-central-1",
+          "awslogs-stream-prefix": "ecs-stack-container-log"
+        }
+      }
+    }
+  ]
+}
