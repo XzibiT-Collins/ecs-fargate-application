@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery - Upload & Share</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600;700&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --background: #ffffff;
+            --foreground: #4b5563;
+            --card: #f9fafb;
+            --card-foreground: #4b5563;
+            --primary: #0891b2;
+            --primary-foreground: #ffffff;
+            --secondary: #ec4899;
+            --secondary-foreground: #ffffff;
+            --muted: #f9fafb;
+            --muted-foreground: #6b7280;
+            --accent: #ec4899;
+            --border: #e5e7eb;
+            --input: #f9fafb;
+            --ring: rgba(8, 145, 178, 0.3);
+            --radius: 0.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, var(--muted) 100%);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--primary-foreground);
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        /* Upload Form Section */
+        .upload-section {
+            padding: 4rem 0;
+            background: var(--background);
+        }
+
+        .upload-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--foreground);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            background: var(--input);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--ring);
+            background: var(--background);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: #0e7490;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(8, 145, 178, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        /* File Upload Styling */
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 2rem;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--muted);
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: rgba(8, 145, 178, 0.05);
+        }
+
+        .file-upload-label.dragover {
+            border-color: var(--secondary);
+            background: rgba(236, 72, 153, 0.05);
+        }
+
+        /* Gallery Section */
+        .gallery-section {
+            padding: 4rem 0;
+            background: var(--muted);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item {
+            background: var(--background);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-item-content {
+            padding: 1.5rem;
+        }
+
+        .gallery-item-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--foreground);
+        }
+
+        .gallery-item-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .upload-card {
+                padding: 1.5rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* Success/Error Messages */
+        .alert {
+            border-radius: var(--radius);
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #166534;
+            border-left: 4px solid #22c55e;
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Scroll reveal animation */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="fas fa-images me-3"></i>
+                Image Gallery
+            </h1>
+            <p class="hero-subtitle">Upload, organize, and share your beautiful moments</p>
+            <a href="#upload" class="btn btn-light btn-lg">
+                <i class="fas fa-upload me-2"></i>
+                Start Uploading
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Upload Section -->
+<section id="upload" class="upload-section reveal">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="upload-card">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-cloud-upload-alt me-2" style="color: var(--primary);"></i>
+                        Upload New Image
+                    </h2>
+
+                    <!-- <CHANGE> Updated form to use Thymeleaf action and match controller expectations -->
+                    <form th:action="@{/images/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-4">
+                            <label for="title" class="form-label">
+                                <i class="fas fa-tag me-2"></i>Image Title
+                            </label>
+                            <input type="text" class="form-control" id="title" name="title" required
+                                   placeholder="Enter a title for your image">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="desc" class="form-label">
+                                <i class="fas fa-tag me-2"></i>Image Description
+                            </label>
+                            <input type="text" class="form-control" id="desc" name="description" required
+                                   placeholder="Enter a description for your image">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-image me-2"></i>Select Image
+                            </label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" class="file-upload-input form-control" id="file" name="file"
+                                       accept="image/*" required>
+                                <label for="file" class="file-upload-label">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: var(--primary);"></i>
+                                    <div class="h5">Drop your image here or click to browse</div>
+                                    <small class="text-muted">Supports JPG, PNG, GIF up to 10MB</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-upload me-2"></i>
+                                Upload Image
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Uploading your image...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="gallery-section reveal">
+    <div class="container">
+        <h2 class="text-center mb-5">
+            <i class="fas fa-th me-2" style="color: var(--primary);"></i>
+            Image Gallery
+        </h2>
+
+        <!-- <CHANGE> Added Thymeleaf conditional rendering for gallery -->
+        <div th:if="${images != null and !images.empty}" class="gallery-grid">
+            <div th:each="image, iterStat : ${images}" class="gallery-item" th:style="'animation-delay: ' + ${iterStat.index * 0.1} + 's'">
+                <!-- <CHANGE> Updated image source to use Thymeleaf expression -->
+                <img th:src="${image.url}" th:alt="${image.title}" loading="lazy">
+                <div class="gallery-item-content">
+                    <h3 class="gallery-item-title" th:text="${image.title}">Image Title</h3>
+                    <div class="gallery-item-actions">
+                        <small class="text-muted" th:text="${#temporals.format(image.uploadDate, 'MMM dd, yyyy')}">Upload Date</small>
+                        <!-- <CHANGE> Added delete form with Thymeleaf action -->
+                        <form th:action="@{'/images/' + ${image.id}}" method="post" style="display: inline;">
+                            <input type="hidden" name="_method" value="delete">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Are you sure you want to delete this image?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- <CHANGE> Added Thymeleaf conditional for empty gallery -->
+        <div th:if="${images == null or images.empty}" class="text-center py-5">
+            <i class="fas fa-images fa-4x mb-3" style="color: var(--muted-foreground);"></i>
+            <h4 style="color: var(--muted-foreground);">No images yet</h4>
+            <p style="color: var(--muted-foreground);">Upload your first image to get started!</p>
+        </div>
+    </div>
+</section>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        initScrollAnimations();
+        initFileUpload();
+
+        // File upload drag and drop
+        function initFileUpload() {
+            const $fileLabel = $('.file-upload-label');
+            const $fileInput = $('#file');
+
+            $fileLabel.on('dragover', function(e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            $fileLabel.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            $fileLabel.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    $fileInput[0].files = files;
+                    updateFileLabel(files[0]);
+                }
+            });
+
+            $fileInput.on('change', function() {
+                if (this.files.length > 0) {
+                    updateFileLabel(this.files[0]);
+                }
+            });
+
+            function updateFileLabel(file) {
+                $fileLabel.html(`
+                        <i class="fas fa-check-circle fa-2x mb-3" style="color: var(--primary);"></i>
+                        <div class="h6">${file.name}</div>
+                        <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                    `);
+            }
+        }
+
+        // Scroll animations
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            $('.reveal').each(function() {
+                observer.observe(this);
+            });
+        }
+
+        // Smooth scroll for anchor links
+        $('a[href^="#"]').on('click', function(e) {
+            e.preventDefault();
+            const target = $($(this).attr('href'));
+            if (target.length) {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 100
+                }, 800);
+            }
+        });
+
+        // <CHANGE> Added form submission handling with loading state
+        $('#uploadForm').on('submit', function() {
+            $('.loading').show();
+            $('button[type="submit"]').prop('disabled', true);
+        });
+    });
+</script>
+</body>
+</html>
