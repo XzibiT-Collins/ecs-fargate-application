@@ -3,7 +3,7 @@ Resources:
   - TargetService:
       Type: AWS::ECS::Service
       Properties:
-        TaskDefinition: arn:aws:ecs:eu-central-1:711387109786:task-definition/ecs-stack-task-definition:26
+        TaskDefinition: arn:aws:ecs:eu-central-1:711387109786:task-definition/ecs-stack-task-definition:27
         LoadBalancerInfo:
           ContainerName: ecs-stack-container
           ContainerPort: 80
