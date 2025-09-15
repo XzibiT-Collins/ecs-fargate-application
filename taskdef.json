@@ -30,7 +30,8 @@
         ],
         "Interval": 30,
         "Timeout": 5,
-        "Retries": 3
+        "Retries": 3,
+        "StartPeriod": 120
       }
     }
   ]
