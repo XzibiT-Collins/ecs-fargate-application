@@ -29,7 +29,7 @@ public class ImageController {
         return "redirect:/images";
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}")
     public String deleteImageById(@PathVariable Long id) {
         imageService.deleteImageById(id);
         return "redirect:/images";
