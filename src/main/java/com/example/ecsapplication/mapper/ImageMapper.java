@@ -14,6 +14,13 @@ public class ImageMapper {
     }
 
     public static ImageResponse toImageResponse(Image image){
-        return ImageResponse.builder().id(image.getId()).title(image.getTitle()).description(image.getDescription()).build();
+        return ImageResponse
+                .builder()
+                .id(image.getId())
+                .title(image.getTitle())
+                .url(image.getUrl())
+                .description(image.getDescription())
+                .uploadDate(image.getUploadDate())
+                .build();
     }
 }
