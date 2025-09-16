@@ -34,6 +34,8 @@ public class S3Bucket {
             String fileName = file.getOriginalFilename() == null ? "file" : Paths.get(file.getOriginalFilename()).getFileName().toString();
             String key = "images/"+ UUID.randomUUID()+"-"+fileName;
 
+            log.info("File name: {}, Key: {}", fileName, key);
+
             // Upload to S3
             PutObjectRequest putObjectRequest = PutObjectRequest
                     .builder()
@@ -54,6 +56,7 @@ public class S3Bucket {
                     .build();
 
             PresignedGetObjectRequest presigned = s3Presigner.presignGetObject(presignRequest);
+            log.info("Presigned url: {}", presigned.url());
             return presigned.url().toString();
         }catch(Exception e){
            log.error("Failed to upload image to S3 bucket", e);
