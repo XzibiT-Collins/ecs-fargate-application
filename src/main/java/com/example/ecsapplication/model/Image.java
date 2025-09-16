@@ -21,7 +21,7 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Size(max = 400, message = "Image URL must be less than 400 characters")
+    @Size(max = 1500, message = "Image URL must be less than 400 characters")
     private String url;
 
     private String title;
